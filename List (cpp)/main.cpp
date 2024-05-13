@@ -1,5 +1,7 @@
 #include <iostream>
 #include "list.h"
+#include <vector>
+
 
 using namespace std;
 
@@ -73,78 +75,109 @@ class Database{
 
 };
 
+void measureTimeElapsed(function<void()> sortFunction) {
+    atomic<bool> finished{false};
+
+    // Timer thread for reporting elapsed time
+    thread timer([&finished]() {
+        auto start = chrono::high_resolution_clock::now();
+        while (!finished) {
+            this_thread::sleep_for(chrono::seconds(2)); // Check every 2 seconds
+            auto now = chrono::high_resolution_clock::now();
+            auto elapsed = chrono::duration_cast<chrono::seconds>(now - start).count();
+            if (!finished) {
+                cout << "Elapsed time: " << elapsed << " seconds" << endl;
+            }
+        }
+    });
+
+    // Sorting thread
+    thread sorter([&]() {
+        sortFunction();
+        finished = true; // Signal the timer thread to finish
+    });
+
+    // Wait for the sorting to finish
+    sorter.join();
+    // Ensure the timer thread exits
+    timer.join();
+
+    // Final report
+    cout << "Sorting completed." << endl;
+}
 
 int main()
 {
 
-    Database db;
+    // Database db;
 
-    cout <<"Welcome to the scuff database. We can do a bunch of stuff by following the instructions below"<<endl;
+    // cout <<"Welcome to the scuff database. We can do a bunch of stuff by following the instructions below"<<endl;
     
-    while(true){
-        int choice;
-        string name;
-        int id;
-        string detail;
-        int menu;
+    // while(true){
+    //     int choice;
+    //     string name;
+    //     int id;
+    //     string detail;
+    //     int menu;
 
-        cout<<"Select one of the choices below"<<endl;
-        cout<<"\t1. Insert into the database"<<endl;
-        cout<<"\t2. Query the database for Object"<<endl;
-        cout<<"\t3. Exit the program"<<endl;
-        cout<<"Your choice -> ";
-        cin>>menu;
+    //     cout<<"Select one of the choices below"<<endl;
+    //     cout<<"\t1. Insert into the database"<<endl;
+    //     cout<<"\t2. Query the database for Object"<<endl;
+    //     cout<<"\t3. Exit the program"<<endl;
+    //     cout<<"Your choice -> ";
+    //     cin>>menu;
 
-        if (menu == 1){
-            cout<<"Enter your name: ";
-            cin>>name;
-            cout<<"Enter your id: ";
-            cin>>id;
-            cout<<"Enter your detail: ";
-            cin >> detail;
-            db.post(new Object(name, id, detail));
-        }else if (menu == 2){
-            cout<<"Select one query method from the choices.\n\t1. Query by name: "<<endl;
-            cout<<"\t2. Query by id: "<<endl;
-            cout<<"Your choice -> ";
-            cin>>choice;
-            if (choice == 1){
-                cout<<"Enter the name: ";
-                cin >> name;
-                db.queryName(name);
-            }else if (choice == 2){
-                cout<<"Enter the ID: ";
-                cin>> id;
-                db.queryID(id);
-            }else{
-                cout<<"Invalid query argument"<<endl;
-            }
-        }else if (menu == 3){
+    //     if (menu == 1){
+    //         cout<<"Enter your name: ";
+    //         cin>>name;
+    //         cout<<"Enter your id: ";
+    //         cin>>id;
+    //         cout<<"Enter your detail: ";
+    //         cin >> detail;
+    //         db.post(new Object(name, id, detail));
+    //     }else if (menu == 2){
+    //         cout<<"Select one query method from the choices.\n\t1. Query by name: "<<endl;
+    //         cout<<"\t2. Query by id: "<<endl;
+    //         cout<<"Your choice -> ";
+    //         cin>>choice;
+    //         if (choice == 1){
+    //             cout<<"Enter the name: ";
+    //             cin >> name;
+    //             db.queryName(name);
+    //         }else if (choice == 2){
+    //             cout<<"Enter the ID: ";
+    //             cin>> id;
+    //             db.queryID(id);
+    //         }else{
+    //             cout<<"Invalid query argument"<<endl;
+    //         }
+    //     }else if (menu == 3){
 
-        }else{
+    //     }else{
 
-        }
+    //     }
 
-    cout<<"\n"<<endl;
+    // cout<<"\n"<<endl;
+    // }
+
+
+
+    List<int> test;
+
+
+    // // append random number in the list
+    for (int i = 0; i < 1000000; i++){
+        test.append(rand() % 100);
     }
 
 
-    // List<int> test;
-    // test.append(123);
-    // test.append(2);
-    // test.append(3);
-    // test.append(2454);
-    // test.append(4);
-
-    // // append random number in the list
-    // for (int i = 0; i < 100; i++){
-    //     test.append(rand() % 100);
-    // }
 
     // test.items();
-    // test.sort();
-    // test.size();
+    // cout<<test.size()<<endl;
+    measureTimeElapsed([&]() { test.sort(); });
     // test.items();
+    // cout<<test.size()<<endl;
+
 
 
    

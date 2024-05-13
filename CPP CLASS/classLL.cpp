@@ -82,7 +82,7 @@ public:
 
 int main(){
     int x = 1;
-    Node pHead;
+    Node pHead = 1;
     pHead.append(2);
     pHead.append(3);
     pHead.append(4);
